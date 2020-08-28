@@ -9,7 +9,7 @@ local function inspect_args(...)
     local v = select(i, ...)
     insert(res, inspect(v, {newline='';indent=''}))
   end
-  return concat(res, ' ')
+  return concat(res, ', ')
 end
 
 local function get_timer_fn()
@@ -52,7 +52,8 @@ local function wrap(fn)
   end
   local R = setmetatable({
     fn = fn;
-    info = debug.getinfo(fn);
+    -- info = debug.getinfo(fn);
+    info = select(2, pcall(debug.getinfo, fn));
     times = {};
   }, wrapped_mt)
   wrapped_fns[fn] = R
@@ -130,9 +131,9 @@ if os.getenv("AK_PROFILER") then
   vim.schedule(ASHKAN_PROFILE_FINISH_FUNCTION)
 end
 function M(name, fn, ...)
-  local X = wrap( fn, ...)
+  local X = wrap(fn)
   X.name = name
-  return X()
+  return X(...)
 end
 
 return {
